@@ -9,9 +9,7 @@ import projectButton from "./projectButton"
 
 
 
-console.log("E")
 
-console.log(localStorage)
 
 
 

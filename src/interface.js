@@ -12,7 +12,7 @@ container.style.marginBottom = "14px"
 main.appendChild(container)
 
 export const projectBox = document.createElement("div")
-projectBox.setAttribute("style", "width: 150px; display: block")
+projectBox.setAttribute("style", "width: fit-content; display: block")
 container.appendChild(projectBox)
 
 export const newProjectButton = document.createElement("button")
@@ -20,35 +20,43 @@ newProjectButton.setAttribute("style", "color: orange; background-color: black")
 newProjectButton.textContent = "Show Projects";
 container.insertBefore(newProjectButton, projectBox);
 
+const formBox = document.createElement("div")
+formBox.setAttribute("style", "display: grid; grid-template-columns: repeat(4, 40px); grid-template-rows: repeat(2, 40px)")
+projectBox.appendChild(formBox)
+
 let dataId = crypto.randomUUID();
 
 export function projectForm() {
     const input = document.createElement("input")
-    input.setAttribute("style", "background-color: black; color: gold; margin-top: 20px")
+    input.setAttribute("style", "background-color: black; color: gold; margin-top: 20px; grid-column: 1 / 4")
     input.setAttribute("value", "Project Name")
     input.setAttribute("data-id", dataId)
-    projectBox.appendChild(input);
+    formBox.appendChild(input);
 }
 
 export function addButton() {
     const button = document.createElement("button")
-    button.setAttribute("style", "color: orange; background-color: black")
+    button.setAttribute("style", "color: orange; background-color: black; grid-row: 2 / 3")
     button.setAttribute("data-id", crypto.randomUUID())
     button.textContent = "Add"
-    projectBox.appendChild(button);
+    formBox.appendChild(button);
 
     button.addEventListener("click", () => {
         
         newProject(document.querySelector(`[data-id="${dataId}"]`).value)
+
+        
        
         getProjectId(document.querySelector(`[data-id="${dataId}"]`).value)
+        document.querySelector(`[data-id="${dataId}"]`).value = "Project Name"
         createElement(project);
-
         
 
         
-
-
+        
+       
+        // console.log(JSON.parse(localStorage.getItem(project.projectTitle)).projectTitle)
+        
     })
     
 }
@@ -57,6 +65,12 @@ projectBox.appendChild(display)
 
 export function displayProjects() {
     for (let project of allProjects) {
+
+
+       // console.log(JSON.parse(localStorage.getItem("allProjects")))
+
+       // console.log(allProjects);
+        
         
         createElement(project);
     }
@@ -74,24 +88,30 @@ export function createElement(obj) {
     const box = document.createElement("div")
     
     box.classList.add("box")
-    display.appendChild(box)    
+    projectBox.insertBefore(box, formBox) 
     const el = document.createElement("button")
     el.setAttribute("style", "background-color: black; color: yellow")
     el.setAttribute("data-id", crypto.randomUUID())
 
     // GET PROJECT FROM LOCAL STORAGE
-   
-
+   //  console.log(JSON.parse(localStorage.getItem(obj.projectTitle)))
+    
+    
 
     el.textContent = obj.projectTitle
     box.appendChild(el)
 
     el.addEventListener("click", () => {
+
+        
         
         el.disabled = true;
         getProjectId(el.textContent)
+
+        console.log(JSON.parse(localStorage.getItem(project.projectTitle)));
         
         displayTasks(box, project, el)
+        console.log("EEE")
     })
 
     
@@ -108,9 +128,20 @@ export function displayTasks(box, project, el) {
     elementBox.setAttribute("style", "display: flex; flex-direction: column; align-items: flex-start")
     task.appendChild(elementBox)
 
-    for (let obj of project.tasks) {
-        
-        taskFunction(obj, elementBox);
+    let storeProjects;
+
+    if (!JSON.parse(localStorage.getItem(project.projectTitle))) {
+        storeProjects = project.tasks
+    } else {
+        storeProjects = JSON.parse(localStorage.getItem(project.projectTitle));
+    }
+    
+   
+    // console.log(JSON.parse(localStorage.getItem("Default")))
+
+    for (let obj of storeProjects) {
+       //  console.log(obj);
+        taskFunction(obj, elementBox, storeProjects);
     }
 
     const buttons = document.createElement("div")
@@ -131,8 +162,9 @@ export function displayTasks(box, project, el) {
         add.disabled = true;
 
         const newTaskBox = document.createElement("div")
+        newTaskBox.setAttribute("style", "display: flex; flex-direction: column")
         task.appendChild(newTaskBox)
-
+s
         const title = elementFactory("title", newTaskBox)
         const desc = elementFactory("description", newTaskBox)
         
@@ -155,6 +187,10 @@ export function displayTasks(box, project, el) {
             newTaskBox.style.display = "none"
             newTask(project.projectTitle, title.value, desc.value, dueDate.value, priority.value)
             
+            console.log(JSON.parse(localStorage.getItem(project.projectTitle)))
+
+            
+
             getTaskId(title.value)
             taskFunction(altTask, elementBox)
         })
@@ -180,7 +216,7 @@ export function hideDetails(tasks, hide) {
 }
 
 
-function taskFunction(task, elementBox) {
+function taskFunction(task, elementBox, storeProjects) {
     
         const cell = document.createElement("div")
         elementBox.appendChild(cell)
@@ -192,7 +228,7 @@ function taskFunction(task, elementBox) {
 
         deleteButton.addEventListener("click", () => {
             deleteTask(project.projectTitle, task.title)
-            console.log(allProjects);
+            
             cell.remove();
         })
 
@@ -202,17 +238,21 @@ function taskFunction(task, elementBox) {
 
         // GET TASK FROM LOCAL STORAGE
 
-      
+        // console.log(JSON.parse(localStorage.getItem(task.title)).title)
+
+       //  console.log(JSON.parse(localStorage.getItem(project.projectTitle)))
+
+        
 
 
-        element.textContent = task.title
+        element.textContent = JSON.parse(localStorage.getItem(task.title)).title
         cell.insertBefore(element, deleteButton)
 
         element.addEventListener("click", () => {
             element.disabled = true;
            
             
-            console.log(task);
+            
             displayDetails(task, cell, element)
             
         })
@@ -243,7 +283,8 @@ export function factory(task, detail, appendTo) {
     const el = document.createElement("div")
     
     // GET DETAIL FROM LOCAL STORAGE
-
+    
+   //  console.log(JSON.parse(localStorage.getItem(task.title)))
    
 
     el.textContent = task[detail]
@@ -294,7 +335,7 @@ export function editDetails(appendTo, el, detail, task) {
 export function saveButton(input, detail, task) {
     
     changeProp(project.projectTitle, task.title, detail, input.value)
-    console.log(allProjects)
+   //  console.log(allProjects)
 }
 
 

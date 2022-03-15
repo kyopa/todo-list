@@ -17,6 +17,8 @@ export let taskId;
 export let altTask;
 
 export function getTaskId(taskName) {
+    
+    
     task = project.tasks.find(task => task.title === taskName)
     altTask = task;
     taskId = task.id;
